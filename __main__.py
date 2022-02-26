@@ -13,7 +13,7 @@ alto=500
 white=(255,255,255)
 color_gemas=(0,255,0)
 color_rocas=(0,90,0)
-
+pygame.mouse.set_visible(0)
 
 pygame.display.set_caption("Greed --||")
 clock = pygame.time.Clock()
@@ -32,6 +32,11 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+    
+    #retrieve the mouse values 
+    mouse_pos = pygame.mouse.get_pos()
+    x=mouse_pos[0]
+    y=mouse_pos[1]
     
     #ventana.fill(white)
     gema.dibujar_gemas()
