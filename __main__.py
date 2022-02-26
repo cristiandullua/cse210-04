@@ -10,7 +10,13 @@ white=(255,255,255)
 color_gemas=(0,255,0)
 color_rocas=(0,90,0)
 ##linea 13
-pygame.mouse.set_visible(0)
+#Coordenadas del jugador
+cord_x=350
+cord_y=450
+#Velocidad del jugador
+velocidad_x= 0
+velocidad_y = 0
+
 pygame.display.set_caption("Greed --||")
 clock = pygame.time.Clock()
 class Artifact:
@@ -66,7 +72,7 @@ class Player(Artifact):
             
     def dibujar_player(self):
                 
-        pygame.draw.rect(self._ventana,(0,133,255),(x, 450, 35 , 5), 0)
+        pygame.draw.rect(self._ventana,(0,133,255),(cord_x, cord_y, 35 , 5), 0)
         
 
 gema=Gema()
@@ -74,29 +80,36 @@ gema.relleno_position()
 roca=Roca()
 roca.relleno_position()
 player=Player()
-cord_x=350
-cord_y=0
-velocidad_x=3
+
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
     
-    #Keyboard movement
-    #if event==
+    #EVENTOS TECLADO
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                velocidad_x = -3
+            if event.key == pygame.K_RIGHT:
+                velocidad_x = 3
+
+        if event.type == pygame.KEYUP:    
+            if event.key == pygame.K_LEFT:
+                velocidad_x = 0
+            if event.key == pygame.K_RIGHT:
+                velocidad_x = 0
+
     
-    mouse_pos = pygame.mouse.get_pos()
-    x=mouse_pos[0]
-    y=mouse_pos[1]
-    #
+
     #aumento la velocidad en 3 pixeles del player
-    cord_x += velocidad_x
-    if cord_x > 660 or cord_x < 0:
-        #Invierte la velocidad
-        velocidad_x *= -1
+    # cord_x += velocidad_x
+    # if cord_x > 660 or cord_x < 0:
+    #     #Invierte la velocidad
+    #     velocidad_x *= -1
     
     #ventana.fill(white)
+    cord_x += velocidad_x
     gema.dibujar_gemas()
     roca.dibujar_rocas()
     player.dibujar_player()
@@ -109,4 +122,3 @@ while True:
 
 
        
-
