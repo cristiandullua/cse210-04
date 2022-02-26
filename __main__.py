@@ -18,7 +18,7 @@ color_rocas=(0,90,0)
 pygame.display.set_caption("Greed --||")
 clock = pygame.time.Clock()
 
-        
+ 
 gema=Gema()
 gema.relleno_position()
 roca=Roca()
@@ -34,16 +34,12 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
-    #aumento la velocidad en 3 pixeles
-    cord_x += velocidad_x
-    if cord_x > 660 or cord_x < 0:
-        #Invierte la velocidad
-        velocidad_x *= -1
     
     #ventana.fill(white)
     gema.dibujar_gemas()
     roca.dibujar_rocas()
     player.dibujar_player()
+    player.move_player()
     #pygame.display.flip()
     pygame.display.update()
     clock.tick(30)
