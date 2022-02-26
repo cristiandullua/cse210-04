@@ -4,20 +4,22 @@ import pygame.locals
 
 pygame.init()       
 
+ancho=700
+alto=500        
 white=(255,255,255)
 color_gemas=(0,255,0)
 color_rocas=(0,90,0)
 
+#ventana= pygame.display.set_mode((ancho, alto))
 pygame.display.set_caption("Greed --||")
 clock = pygame.time.Clock()
-
 class Artifact:
 
     def __init__(self):
         self._position=[]
-        self._ancho=700
-        self._alto=500
-        self._ventana= pygame.display.set_mode((self._ancho, self._alto))        
+        self._center = ancho/2
+        self._velocidad = 3
+        self._ventana = pygame.display.set_mode((ancho, alto))        
 
 
     def relleno_position(self):
@@ -30,7 +32,9 @@ class Gema(Artifact):
 
     def __init__(self):
         super().__init__()
-        self._gema="*"        
+        self._gema="*"
+        self._positionX=0
+        self._positionY=0        
         
     def dibujar_gemas(self):
         self._ventana.fill(white)        
@@ -61,25 +65,38 @@ class Player(Artifact):
         
             
     def dibujar_player(self):
-       
-            pygame.draw.rect(self._ventana,(0,133,255),(300,450,35,5),0)
-            
+                
+        pygame.draw.rect(self._ventana,(0,133,255),(cord_x, 450, 35 , 5), 0)
+        
+
 gema=Gema()
 gema.relleno_position()
 roca=Roca()
 roca.relleno_position()
 player=Player()
+cord_x=350
+cord_y=0
+velocidad_x=3
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
+    #aumento la velocidad en 3 pixeles
+    cord_x += velocidad_x
+    if cord_x > 660 or cord_x < 0:
+        #Invierte la velocidad
+        velocidad_x *= -1
     
-    
+    #ventana.fill(white)
     gema.dibujar_gemas()
     roca.dibujar_rocas()
     player.dibujar_player()
+    #pygame.display.flip()
     pygame.display.update()
     clock.tick(30)
+       
+
+
        
 
