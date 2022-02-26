@@ -11,7 +11,7 @@ class Player(Artifact):
             
     def dibujar_player(self):
                 
-        pygame.draw.rect(self._ventana,(0,133,255),(self._cord_x, 450, 35 , 5), 0)
+        pygame.draw.rect(self._ventana,(0,133,255),(x, 450, 35 , 5), 0)
         
     def move_player(self):
         self._cord_x += self._velocidad_x
