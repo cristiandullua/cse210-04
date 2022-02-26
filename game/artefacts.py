@@ -2,7 +2,7 @@ import pygame, random
 
 ancho = 700
 alto = 500
-
+pygame.mouse.set_visible(0)
 class Artifact:
 
     def __init__(self):
