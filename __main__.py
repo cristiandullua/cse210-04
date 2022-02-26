@@ -14,9 +14,7 @@ white=(255,255,255)
 color_gemas=(0,255,0)
 color_rocas=(0,90,0)
 
-mouse_pos = pygame.mouse.get_pos()
-x=mouse_pos[0]
-y=mouse_pos[1]
+
 pygame.display.set_caption("Greed --||")
 clock = pygame.time.Clock()
 
