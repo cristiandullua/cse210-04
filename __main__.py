@@ -28,7 +28,10 @@ cord_x=350
 cord_y=0
 velocidad_x=3
 
-
+#retrieve the mouse values 
+mouse_pos = pygame.mouse.get_pos()
+x=mouse_pos[0]
+y=mouse_pos[1]
 
 while True:
     for event in pygame.event.get():
