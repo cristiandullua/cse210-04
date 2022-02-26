@@ -5,6 +5,7 @@ from game.artefacts import Artifact
 from game.gema import Gema
 from game.roca import Roca
 from game.player import Player
+
 pygame.init()       
 
 ancho=700
@@ -18,8 +19,6 @@ pygame.display.set_caption("Greed --||")
 clock = pygame.time.Clock()
 
         
-
-
 gema=Gema()
 gema.relleno_position()
 roca=Roca()
@@ -52,3 +51,4 @@ while True:
 
 
        
+
