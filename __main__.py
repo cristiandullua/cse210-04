@@ -176,7 +176,7 @@ while not hecho:
    
 pygame.quit()
 ##########
-
+'''
 import pygame, sys,random
 import pygame.event
 import pygame.locals
@@ -296,7 +296,7 @@ while True:
     pygame.display.update()
     clock.tick(30)
        
-
+'''
 
 
 
