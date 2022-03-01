@@ -1,6 +1,3 @@
-
-
-#from email import message
 import pygame
 import random
 pygame.init()
@@ -10,38 +7,41 @@ class Artifact(pygame.sprite.Sprite):
     """ This class represents the Artifacts like gems and rocks """
     def __init__(self):
         super().__init__() 
-        self.image = " "
+        self.image = ""
         self.color = " " 
         self.rect = ""
 
     def reset_pos(self):        
-        self.rect.y = random.randrange(-300, -20)
+        self.rect.y = random.randrange(-300, 50)
         self.rect.x = random.randrange(0, 900)
-        
+
     def update(self):       
-        self.rect.y += 1
+        self.rect.y += 4
         if self.rect.y > 900:
-            self.reset_pos() 
-        
+            self.reset_pos()
 
 class Gema(Artifact, pygame.sprite.Sprite):
     """ This class represents the gems"""
     def __init__(self):
         super().__init__() 
-        self.image = pygame.Surface([20, 15])
+        self.image = pygame.Surface([12, 15])
         self.color = self.image.fill(RED)  
-        self.rect = self.image.get_rect()        
+        self.rect = self.image.get_rect()
+    
+    def earn_points(self, score):        
+        return score + 1         
 
 class Roca(Gema, pygame.sprite.Sprite):
     """ This class represents the rocs"""
     def __init__(self):
         super().__init__()
-        self._image =  pygame.Surface([20, 15]) 
+        #self._image =  pygame.Surface([25, 10]) 
         self.color = self.image.fill(GREEN)
-    
-    def earn_points(self, score):        
-        return score + 1     
- 
+        #self.rect = self.image.get_rect()
+
+    def lose_points(self, score):        
+        return score - 1     
+
 class Player(pygame.sprite.Sprite):
     """ This class represents the main character Player """       
     def __init__(self):
@@ -52,25 +52,39 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx = 900 / 2
        #self.rect.centery = 700 / 2 
         self.speed = [0.5, -0.5] 
-                 
+
     def update(self):
         """ Actualize player's location """       
         pos = pygame.mouse.get_pos()      
         self.rect.x = pos[0]     
 
+class SpecialEffects:
+    def __init__(self):
+         self.backg = ""
+         self.music = ""
+         self.col_rock_efect =" "
+         self.col_gem_efect =" "    
+    
+    def load_backgrounds(self):
+        self.backg = pygame.image.load("space_background.jpg")
+        pygame.image.load("space_background.jpg").convert() 
+        screen.blit(self.backg, [0, 0])
+    
+    def backg_music(self):
+        self.music = pygame.mixer.music.load("plumbum-rain.wav")
+        pygame.mixer.music.play()
+    
 class Message:
     def __init__(self):
         self.message = ""
 
-        def colide_gem():
-            self.message = "Hurrah! You got 1 point!"
-            return self.message
-    
-        def colide_rock():
-            self.message = "Ups! You lost 1 point!"
-            return self.message
-        
+    def colide_gem(self):
+        self.message = "Hurrah! You got 1 point!"
+        return self.message
 
+    def colide_rock(self):
+        self.message = "Ups! You lost 1 point!"
+        return self.message
 
 BLUE = [12, 44, 146]
 GREEN = [46, 189, 20]
@@ -82,6 +96,8 @@ RED = [255, 0, 0]
 dimensions = [900, 700] 
 screen = pygame.display.set_mode(dimensions)
 pygame.display.set_caption("Greed Game")
+effects = SpecialEffects()
+music = effects.backg_music() 
 
 # This is a list of all the sprites.
 lista_de_todos_los_sprites = pygame.sprite.Group() 
@@ -89,12 +105,12 @@ lista_de_todos_los_sprites = pygame.sprite.Group()
 lista_artifacts = pygame.sprite.Group()
 lista_gemas = pygame.sprite.Group()
 lista_rocks = pygame.sprite.Group()
- 
-for i in range(40):
+
+for i in range(60):
     gema =Gema() 
     # setting the gems' location 
     gema.rect.x = random.randrange(0, 900)
-    gema.rect.y = random.randrange(-3500, 50)     
+    gema.rect.y = random.randrange(-1500, 100)     
     lista_gemas.add(gema)
     lista_de_todos_los_sprites.add(gema)
     lista_artifacts.add(gema)
@@ -103,7 +119,7 @@ for i in range(60):
     rock = Roca() 
     # setting the rocks' location 
     rock.rect.x = random.randrange(0, 900)
-    rock.rect.y = random.randrange(-3500, 50)     
+    rock.rect.y = random.randrange(-1500, 100)     
     lista_rocks.add(rock)
     lista_de_todos_los_sprites.add(rock)
     lista_artifacts.add(rock)  
@@ -117,7 +133,6 @@ reloj = pygame.time.Clock()
 player.rect.y = 600
 done = False
 
- 
 # -------- Instruction Page Loop -----------
 while not done :
     for event in pygame.event.get():
@@ -125,63 +140,73 @@ while not done :
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             done = True
- 
+
     # Set the screen background
     screen.fill(BLACK) 
-   
+
     # Limit to 60 frames per second
-    reloj.tick(60)
+    reloj.tick(-100)
     screen.fill(WHITE)
-    
     # Go ahead and update the screen with what we've drawn.
     pygame.display.flip()
 
 # Main program loop
 hecho = False
 score = 0
-while not hecho:
-     
+while not hecho:                           
+
     for evento in pygame.event.get():  
         if evento.type == pygame.QUIT: 
             hecho = True        
-            
-    """--- Game logical---""" 
-    
-    lista_de_todos_los_sprites.update()
 
-    artifact = Artifact()          
-          
-    gem_hit_list = pygame.sprite.spritecollide(player, lista_gemas, True)
-    rock_hit_list = pygame.sprite.spritecollide(player, lista_rocks, True)         
-                
-    for artifact in gem_hit_list:                                
-            lista_gemas.remove(gema)            
-            lista_artifacts.remove(gema)          
+    """--- Game logical---""" 
+
+    lista_de_todos_los_sprites.update()
+    artifact = Artifact()       
+
+    gem_hit = pygame.sprite.spritecollide(player, lista_gemas, True)
+    rock_hit = pygame.sprite.spritecollide(player, lista_rocks, True)         
+
+    for artifact in gem_hit:                                
+            #lista_gemas.remove(gema)            
+            #lista_artifacts.remove(gema)
+            gema =Gema() 
+            # setting the gems' location 
+            gema.rect.x = random.randrange(0, 900)
+            gema.rect.y = random.randrange(-3500, 50)     
+            lista_gemas.add(gema)
+            lista_de_todos_los_sprites.add(gema)
+            lista_artifacts.add(gema)                   
             score -= 1   
-            print(score)
-    
-    for artifact in rock_hit_list:           
-            lista_rocks.remove(rock)
-            lista_artifacts.remove(rock)
+           
+    for artifact in rock_hit:           
+            #lista_rocks.remove(rock)
+            #lista_artifacts.remove(rock)
+            rock = Roca() 
+            # setting the rocks' location 
+            rock.rect.x = random.randrange(0, 900)
+            rock.rect.y = random.randrange(-3500, 50)     
+            lista_rocks.add(rock)
+            lista_de_todos_los_sprites.add(rock)
+            lista_artifacts.add(rock)
             score += 1 
-            print(score)
-    
-    fuente = pygame.font.Font(None, 40)
-    points = fuente.render('SCORE '+str(score), 
+
+    font = pygame.font.Font(None, 40)
+    points = font.render('SCORE = '+str(score), 
     True, (200,200,200), (0,0,0) )                  
     rectanglePoints = points.get_rect()           
     rectanglePoints.left = 10                           
-    rectanglePoints.top = 10                            
-
-    pygame.display.flip()
-    screen.fill(WHITE)          
-      
-    lista_de_todos_los_sprites.draw(screen)
-    print_score = screen.blit(points, rectanglePoints)
+    rectanglePoints.top = 10
+    effects = SpecialEffects()    
     pygame.display.flip()
     
+    screen.fill(WHITE)    
+    backg = effects.load_backgrounds()  
+    lista_de_todos_los_sprites.draw(screen)
+    print_score = screen.blit(points, rectanglePoints)   
+    pygame.display.flip()    
     reloj.tick(110)
-   
+
 pygame.quit()
 '''#################
 from email import message
