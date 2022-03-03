@@ -1,4 +1,5 @@
 from game.shared.point import Point
+from game.casting.artifact import Artifact
 
 ### ADD VELOCITY
 VELOCITY_ARTIFACTS = 3
@@ -14,7 +15,7 @@ class Director:
         _video_service (VideoService): For providing video output.
     """
 
-    def __init__(self, keyboard_service, video_service):
+    def __init__(self, keyboard_service, video_service, starting_artifacts, columns, rows, font_size, cell_size):
         """Constructs a new Director using the specified keyboard and video services.
         
         Args:
@@ -23,8 +24,14 @@ class Director:
         """
         self._keyboard_service = keyboard_service
         self._video_service = video_service
-        ### ADD SCORE
+        ### ADD SCORE and other variables
         self._score = 0
+        
+        self._starting_artifacts = starting_artifacts
+        self._columns = columns
+        self._rows = rows
+        self._font_size = font_size
+        self._cell_size = cell_size
         ###
         
     def start_game(self, cast):
@@ -33,6 +40,11 @@ class Director:
         Args:
             cast (Cast): The cast of actors.
         """
+        ### STARTING CONDITIONS
+        for n in range(self._starting_artifacts):
+            artifact = Artifact(self._columns, self._rows, self._cell_size, self._font_size)
+            cast.add_actor("artifacts", artifact)
+        ###
         self._video_service.open_window()
         while self._video_service.is_window_open():
             self._get_inputs(cast)
@@ -53,7 +65,6 @@ class Director:
         ### Velocity for Artifacts
         artifacts = cast.get_actors("artifacts")
         velocity_artifacts = Point(0, VELOCITY_ARTIFACTS)
-        #velocity_artifacts = velocity_artifacts.scale(15)
 
         for artifact in artifacts:
             artifact.set_velocity(velocity_artifacts)
@@ -79,19 +90,20 @@ class Director:
             artifact.move_next(max_x, max_y)
         ###
 
-        ### Replace messages with scores        
+        ### Remove hit artifacts create new Artifacts        
         for artifact in artifacts:
             if robot.get_position().equals(artifact.get_position_bottom()):
                 self._add_score(artifact.get_points())
                 cast.remove_actor("artifacts", artifact)
-                ###
+                
+                ### ADD new artifact when one get removed
+                new_artifact = Artifact(self._columns, self._rows, self._cell_size, self._font_size)
+                new_artifact.set_position(Point(new_artifact.get_position().get_x(), max_y))
+                cast.add_actor("artifacts", new_artifact)
+        ###
 
         banner.set_text("Score: " + str(self._score))    
-
-#            if robot.get_position().equals(artifact.get_position()):
-#                message = artifact.get_message()
-#                banner.set_text(message)    
-        
+       
     def _do_outputs(self, cast):
         """Draws the actors on the screen.
         
