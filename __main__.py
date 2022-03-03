@@ -1,520 +1,105 @@
-import pygame
+import os
 import random
 
-pygame.init()
-pygame.mouse.set_visible(0)
+from game.casting.actor import Actor
+from game.casting.artifact import Artifact
+from game.casting.cast import Cast
 
-class Artifact(pygame.sprite.Sprite):
-    """ This class represents the Artifacts like gems and rocks """
-    def __init__(self):
-        super().__init__() 
-        self.image = ""
-        self.color = " " 
-        self.rect = ""
+from game.directing.director import Director
 
-    def reset_pos(self):        
-        self.rect.y = random.randrange(-300, 50)
-        self.rect.x = random.randrange(0, 900)
+from game.services.keyboard_service import KeyboardService
+from game.services.video_service import VideoService
 
-    def update(self):       
-        self.rect.y += 4
-        if self.rect.y > 900:
-            self.reset_pos()
+from game.shared.color import Color
+from game.shared.point import Point
 
-class Gema(Artifact, pygame.sprite.Sprite):
-    """ This class represents the gems"""
-    def __init__(self):
-        super().__init__() 
-        self.image = pygame.image.load("gem.png").convert()
-        self.image.set_colorkey(BLACK) 
-        self.rect = self.image.get_rect()
 
-    def earn_points(self, score):        
-        return score + 1         
+FRAME_RATE = 12
+MAX_X = 900
+MAX_Y = 600
+CELL_SIZE = 15
+FONT_SIZE = 15
+COLS = 60
+ROWS = 40
+CAPTION = "Robot Finds Kitten"
+DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + "/data/messages.txt"
+WHITE = Color(255, 255, 255)
+DEFAULT_ARTIFACTS = 40
 
-class Roca(Artifact, pygame.sprite.Sprite):
-    """ This class represents the rocs"""
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.image.load("rock.png").convert()
-        self.image.set_colorkey(BLACK)
-        self.rect = self.image.get_rect()
+### ADD PARAMETERS
+ROCK_TEXT = 'o'
+GEM_TEXT = '*'
+GEM_POINTS = 1
+ROCK_POINTS = -1
+###
 
-    def lose_points(self, score):        
-        return score - 1     
+def main():
+    
+    # create the cast
+    cast = Cast()
+    
+    # create the banner
+    banner = Actor()
+    banner.set_text("")
+    banner.set_font_size(FONT_SIZE)
+    banner.set_color(WHITE)
+    banner.set_position(Point(CELL_SIZE, 0))
+    cast.add_actor("banners", banner)
+    
+    # create the robot
+    x = int(MAX_X / 2)
+    y = MAX_Y - CELL_SIZE
+    position = Point(x, y)
 
-class Player(pygame.sprite.Sprite):
-    """ This class represents the main character Player """       
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("saucer.png").convert()
-        self.image.set_colorkey(BLACK)
-        self.rect = self.image.get_rect()
-        self.rect.centerx = 900 / 2      
-        self.speed = [0.5, -0.5] 
+    robot = Actor()
+    robot.set_text("#")
+    robot.set_font_size(FONT_SIZE)
+    robot.set_color(WHITE)
+    robot.set_position(position)
+    cast.add_actor("robots", robot)
+    
+    # create the artifacts
+#    with open(DATA_PATH) as file:
+#        data = file.read()
+#        messages = data.splitlines()
 
-    def update(self):
-        """ Actualize player's location """       
-        pos = pygame.mouse.get_pos()      
-        self.rect.x = pos[0]     
+    for n in range(DEFAULT_ARTIFACTS):
+        ### Only o or *
+        text = random.choice([ROCK_TEXT, GEM_TEXT])
+#        message = messages[n]
 
-class SpecialEffects:
-    def __init__(self):
-         self.backg = ""
-         self.music = ""
-         self.sound_rock = ""
-         self.sound_gem = ""   
+        x = random.randint(1, COLS - 1)
+        y = random.randint(1, ROWS - 1)
+        position = Point(x, y)
+        position = position.scale(CELL_SIZE)
 
-    def load_backgrounds(self):
-        self.backg = pygame.image.load("space_background.jpg")
-        pygame.image.load("space_background.jpg").convert() 
-        screen.blit(self.backg, [0, 0])
-
-    def backg_music(self):
-        self.music = pygame.mixer.music.load("plumbum-rain.wav")
-        pygame.mixer.music.play()
-
-    def sound_col_rock(self):
-        self.sound_rock = pygame.mixer.Sound("kretopi__synthweapon-003.wav")
-        self.sound_rock.play()
-
-    def sound_col_gem(self):
-        self.sound_gem = pygame.mixer.Sound("got_point.mp3")
-        self.sound_gem.play()
-
-class Message:
-    def __init__(self):
-        self.message = ""
-
-    def colide_gem(self):
-        self.message = "Hurrah! You got 1 point!"
-        return self.message
-
-    def colide_rock(self):
-        self.message = "Ups! You lost 1 point!"
-        return self.message
-
-BLUE = [12, 44, 146]
-GREEN = [46, 189, 20]
-BLACK = [0, 0, 0]
-WHITE = [255, 255, 255]
-RED = [255, 0, 0]
-
-#My screen
-dimensions = [900, 700] 
-screen = pygame.display.set_mode(dimensions)
-
-effects = SpecialEffects()
-music = effects.backg_music() 
-
-# This is a list of all the sprites.
-lista_de_todos_los_sprites = pygame.sprite.Group() 
-# This list represents each artifact in the game.
-lista_artifacts = pygame.sprite.Group()
-lista_gemas = pygame.sprite.Group()
-lista_rocks = pygame.sprite.Group()
-
-for i in range(60):
-    gema =Gema() 
-    # setting the gems' location 
-    gema.rect.x = random.randrange(0, 900)
-    gema.rect.y = random.randrange(-3500, 100)     
-    lista_gemas.add(gema)
-    lista_de_todos_los_sprites.add(gema)
-    lista_artifacts.add(gema)
-
-for i in range(60):
-    rock = Roca() 
-    # setting the rocks' location 
-    rock.rect.x = random.randrange(0, 900)
-    rock.rect.y = random.randrange(-3500, 100)     
-    lista_rocks.add(rock)
-    lista_de_todos_los_sprites.add(rock)
-    lista_artifacts.add(rock)  
-
-player = Player()
-lista_de_todos_los_sprites.add(player)
-reloj = pygame.time.Clock()
-player.rect.y = 600
-done = False
-
-# -------- Instruction Page Loop -----------
-while not done :
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            done = True
-
-    # Limit to 60 frames per second
-    reloj.tick(60)
-    screen.fill(WHITE)
-
-    # Go ahead and update the screen with what we've drawn.
-    pygame.display.flip()
-
-# Main program loop
-hecho = False
-score = 0
-while not hecho:                           
-
-    for evento in pygame.event.get():  
-        if evento.type == pygame.QUIT: 
-            hecho = True       
-
-    """--- Game logical---""" 
-
-    lista_de_todos_los_sprites.update()
-
-    artifact = Artifact()          
-
-    gem_hit = pygame.sprite.spritecollide(player, lista_gemas, True)
-    rock_hit = pygame.sprite.spritecollide(player, lista_rocks, True)         
-
-    for artifact in gem_hit:                                
-
-            effects.sound_col_gem()            
-            gema =Gema() 
-            # setting the gems' location 
-            gema.rect.x = random.randrange(0, 900)
-            gema.rect.y = random.randrange(-3500, 50)     
-            lista_gemas.add(gema)
-            lista_de_todos_los_sprites.add(gema)
-            lista_artifacts.add(gema)                   
-            score -= 1   
-
-    for artifact in rock_hit:           
-            effects.sound_col_rock()  
-            rock = Roca() 
-            # setting the rocks' location 
-            rock.rect.x = random.randrange(0, 900)
-            rock.rect.y = random.randrange(-3500, 50)     
-            lista_rocks.add(rock)
-            lista_de_todos_los_sprites.add(rock)
-            lista_artifacts.add(rock)
-            score += 1 
-
-    font = pygame.font.Font(None, 40)
-    points = font.render('SCORE = '+str(score), 
-    True, (200,200,200), (0,0,0) )                  
-    rectanglePoints = points.get_rect()           
-    rectanglePoints.left = 10                           
-    rectanglePoints.top = 10        
-    pygame.display.flip()
-
-    screen.fill(WHITE)    
-
-    backg = effects.load_backgrounds()   
-    lista_de_todos_los_sprites.draw(screen)
-    print_score = screen.blit(points, rectanglePoints)
-
-    pygame.display.flip()
-
-    reloj.tick(110)
-
-pygame.quit() 
-'''#################
-from email import message
-import pygame
-import random
-
-class Artifact(pygame.sprite.Sprite):
-    """ This class represents the Artifacts like gems and rocks """
-    def __init__(self):
-        super().__init__() 
-        self.image = " "
-        self.color = " " 
-        self.rect = ""
-
-    def reset_pos(self):        
-        self.rect.y = random.randrange(-300, -20)
-        self.rect.x = random.randrange(0, 900)
+        r = random.randint(0, 255)
+        g = random.randint(0, 255)
+        b = random.randint(0, 255)
+        color = Color(r, g, b)
         
-    def update(self):       
-        self.rect.y += 1
-        if self.rect.y > 900:
-            self.reset_pos() 
+        artifact = Artifact()
+        artifact.set_text(text)
+        artifact.set_font_size(FONT_SIZE)
+        artifact.set_color(color)
+        artifact.set_position(position)
 
-class Gema(Artifact, pygame.sprite.Sprite):
-    """ This class represents the gems"""
-    def __init__(self):
-        super().__init__() 
-        self.image = pygame.Surface([10, 10])
-        self.color = self.image.fill(RED)  
-        self.rect = self.image.get_rect()        
+        ### ADD POINTS
+        if text is ROCK_TEXT:
+            artifact.set_points(ROCK_POINTS)
+        if text is GEM_TEXT:
+            artifact.set_points(GEM_POINTS)
+        ###
 
-class Roca(Gema, pygame.sprite.Sprite):
-    """ This class represents the rocs"""
-    def __init__(self):
-        super().__init__()
-        self._image =  pygame.Surface([10, 10]) 
-        self.color = self.image.fill(GREEN)
+#        artifact.set_message(message)
+        cast.add_actor("artifacts", artifact)
     
-    def earn_points(self, score):        
-        return score + 1     
- 
-class Player(pygame.sprite.Sprite):
-    """ This class represents the main character Player """       
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = self.image = pygame.Surface([10, 10])
-             
-        self.rect = self.image.get_rect()
-        self.rect.centerx = 900 / 2
-       #self.rect.centery = 700 / 2 
-        self.speed = [0.5, -0.5] 
-                 
-    def update(self):
-        """ Actualize player's location """       
-        pos = pygame.mouse.get_pos()      
-        self.rect.x = pos[0]     
-
-class Message:
-    def __init__(self):
-        self.message = ""
-
-        def colide_gem():
-            self.message = "Hurrah! You got 1 point!"
-            return self.message
-    
-        def colide_rock():
-            self.message = "Ups! You lost 1 point!"
-            return self.message
-        
-pygame.init()
-
-BLUE = [12, 44, 146]
-GREEN = [46, 189, 20]
-BLACK = [0, 0, 0]
-WHITE = [255, 255, 255]
-RED = [255, 0, 0]
-
-#My screen
-dimensions = [900, 700] 
-screen = pygame.display.set_mode(dimensions)
-pygame.display.set_caption("Greed Game")
-
-# This is a list of all the sprites.
-lista_de_todos_los_sprites = pygame.sprite.Group() 
-# This list represents each artifact in the game.
-lista_artifacts = pygame.sprite.Group()
-lista_gemas = pygame.sprite.Group()
-lista_rocks = pygame.sprite.Group()
- 
-for i in range(60):
-    gema =Gema() 
-    # setting the gems' location 
-    gema.rect.x = random.randrange(0, 900)
-    gema.rect.y = random.randrange(-3500, 50)     
-    lista_gemas.add(gema)
-    lista_de_todos_los_sprites.add(gema)
-    lista_artifacts.add(gema)
-
-for i in range(60):
-    rock = Roca() 
-    # setting the rocks' location 
-    rock.rect.x = random.randrange(0, 900)
-    rock.rect.y = random.randrange(-3500, 50)     
-    lista_rocks.add(rock)
-    lista_de_todos_los_sprites.add(rock)
-    lista_artifacts.add(rock)  
-
-player = Player()
-lista_de_todos_los_sprites.add(player)
-
-reloj = pygame.time.Clock()
-
-score = 0
-player.rect.y = 600
-done = False
-
- 
-# -------- Instruction Page Loop -----------
-while not done :
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            done = True
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            done = True
- 
-    # Set the screen background
-    screen.fill(BLACK) 
-   
-    # Limit to 60 frames per second
-    reloj.tick(60)
-    screen.fill(WHITE)
-    
-    # Go ahead and update the screen with what we've drawn.
-    pygame.display.flip()
-
-# Main program loop
-hecho = False
-while not hecho:
-     
-    for evento in pygame.event.get():  
-        if evento.type == pygame.QUIT: 
-            hecho = True        
-            
-    """--- Game logical---""" 
-    
-    lista_de_todos_los_sprites.update()
-
-    artifact = Artifact()          
-          
-    gem_hit_list = pygame.sprite.spritecollide(player, lista_gemas, True)
-    rock_hit_list = pygame.sprite.spritecollide(player, lista_rocks, True)         
-                
-    for artifact in gem_hit_list:                                
-            lista_gemas.remove(gema)            
-            lista_artifacts.remove(gema)          
-            score + 1   
-    
-    for artifact in rock_hit_list:           
-            lista_rocks.remove(rock)
-            lista_artifacts.remove(rock)
-            score - 1 
-                                  
-    fuente = pygame.font.Font(None, 30)
-    points = fuente.render('SCORE '+str(score), 
-    True, (200,200,200), (0,0,0) )                  
-    rectanglePoints = points.get_rect()           
-    rectanglePoints.left = 10                           
-    rectanglePoints.top = 10                            
-
-    pygame.display.flip()
-    screen.fill(WHITE)          
-      
-    lista_de_todos_los_sprites.draw(screen)
-    print_score = screen.blit(points, rectanglePoints)
-    pygame.display.flip()
-    
-    reloj.tick(110)
-   
-pygame.quit()
-'''
-##########
-'''
-import pygame, sys,random
-import pygame.event
-import pygame.locals
-
-pygame.init()       
-
-ancho=700
-alto=500        
-white=(255,255,255)
-color_gemas=(0,255,0)
-color_rocas=(0,90,0)
-##linea 13
-#Coordenadas del jugador
-cord_x=350
-cord_y=450
-#Velocidad del jugador
-velocidad_x= 0
-velocidad_y = 0
-
-pygame.display.set_caption("Greed --||")
-clock = pygame.time.Clock()
-class Artifact:
-
-    def __init__(self):
-        self._position=[]
-        self._center = ancho/2
-        self._velocidad = 3
-        self._ventana = pygame.display.set_mode((ancho, alto))        
+    # start the game
+    keyboard_service = KeyboardService(CELL_SIZE)
+    video_service = VideoService(CAPTION, MAX_X, MAX_Y, CELL_SIZE, FRAME_RATE)
+    director = Director(keyboard_service, video_service)
+    director.start_game(cast)
 
 
-    def relleno_position(self):
-        for i in range(60):
-            x=random.randint(1,700)
-            y=random.randint(1,600)           
-            self._position.append([x,y])                    
-    
-class Gema(Artifact):
-
-    def __init__(self):
-        super().__init__()
-        self._gema="*"
-        self._positionX=0
-        self._positionY=0        
-        
-    def dibujar_gemas(self):
-        self._ventana.fill(white)        
-        for coordenada in self._position:
-            pygame.draw.circle(self._ventana,color_gemas,(coordenada),7)
-            #el cuatro es la velocidad o la cantidad de pixeles que avanzan los puntos de las coordenadas de las pelotitas que avanzaran hasta llegar al final de pantalla.
-            coordenada[1]+=4
-            #verifico que las gemas vuelvan a aparecen al llegar al final e la pantalla eje de las 'Y'
-            if  coordenada[1] == 600 :
-                coordenada[1] = 0
-        
-class Roca(Artifact):
-    def __init__(self):
-        super().__init__()
-        self._rocas="O"
-
-    def dibujar_rocas(self):        
-        for coordenada in self._position:
-            pygame.draw.circle(self._ventana,color_rocas,(coordenada),9)
-            #el cuatro es la velocidad o la cantidad de pixeles que avanzan los puntos de las coordenadas de las pelotitas que avanzaran hasta llegar al final de pantalla.
-            coordenada[1]+=4
-            if  coordenada[1] == 596 :
-                coordenada[1] = 0
-
-class Player(Artifact):
-    def __init__(self):
-        super().__init__()
-        
-            
-    def dibujar_player(self):
-                
-        pygame.draw.rect(self._ventana,(0,133,255),(cord_x, cord_y, 35 , 5), 0)
-        
-
-gema=Gema()
-gema.relleno_position()
-roca=Roca()
-roca.relleno_position()
-player=Player()
-
-
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
-    
-    #EVENTOS TECLADO
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                velocidad_x = -3
-            if event.key == pygame.K_RIGHT:
-                velocidad_x = 3
-
-        if event.type == pygame.KEYUP:    
-            if event.key == pygame.K_LEFT:
-                velocidad_x = 0
-            if event.key == pygame.K_RIGHT:
-                velocidad_x = 0
-
-    
-
-    #aumento la velocidad en 3 pixeles del player
-    # cord_x += velocidad_x
-    # if cord_x > 660 or cord_x < 0:
-    #     #Invierte la velocidad
-    #     velocidad_x *= -1
-    
-    #ventana.fill(white)
-    cord_x += velocidad_x
-    gema.dibujar_gemas()
-    roca.dibujar_rocas()
-    player.dibujar_player()
-    #pygame.display.flip()
-    pygame.display.update()
-    clock.tick(30)
-       
-'''
-
-
-
-       
+if __name__ == "__main__":
+    main()
