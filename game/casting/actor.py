@@ -9,8 +9,7 @@ class Actor:
     space.
 
     Attributes:
-        _text (string): The text to display
-        _font_size (int): The font size to use.
+        _text (string): The text to display        
         _color (Color): The color of the text.
         _position (Point): The screen coordinates.
         _velocity (Point): The speed and direction.
@@ -22,7 +21,7 @@ class Actor:
         ### ADD POINTS
         self._points = 0
         ###
-        self._font_size = 15
+      
         self._color = Color(255, 255, 255)
         self._position = Point(0, 0)
         self._velocity = Point(0, 0)
